@@ -82,7 +82,7 @@ def train_model(r_net: torch.nn.Module,
         if epoch % epoch_step == 0:
             print(f'Epoch {epoch}:')
             print('TRAIN METRICS:', train_metrics)
-            print('VALID METRICS:', valid_metrics)
+            # print('VALID METRICS:', valid_metrics)
             print(f'TIME: {time:.2f} s')
 
         if lr_scheduler:
@@ -95,7 +95,8 @@ def train_model(r_net: torch.nn.Module,
             print(f'Saving model on epoch {epoch}')
             plot_learning_curves(metrics, metric_path)
 
-        if valid_metrics['rec_loss'] < rec_loss_bound and train_metrics['rec_loss'] < rec_loss_bound:
+        # if valid_metrics['rec_loss'] < rec_loss_bound and train_metrics['rec_loss'] < rec_loss_bound:
+        if valid_metrics['rec_loss'] < rec_loss_bound:
             torch.save(r_net, r_net_path)
             torch.save(d_net, d_net_path)
             print('Reconstruction loss achieved optimum')
