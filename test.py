@@ -10,7 +10,11 @@ import torchvision
 import torchvision.transforms as tf
 from train import train_model
 from model import R_Net, D_Net, R_Loss, D_Loss, R_WLoss, D_WLoss, Dataset
-
+from TrajectoriesDataSet import TrajectoryDataset
+import cv2
+import numpy as np
+from utils import read_img
+import math
 
 
 def test_model(r_net: torch.nn.Module,
@@ -46,29 +50,50 @@ def test_model(r_net: torch.nn.Module,
             x_fake = r_net(x_real)
             y_disci = d_net(x_fake)
             print(y_disci)
-            pass;
+            plt_curvese(x_real, x_fake)
+            pass
 
 
-def plt_curvese(x_real,x_fake,need_transform):
-    
-    plt.figure();
-    plt.subplot(121)
-    plt.imshow(x_real)
-    plt.subplot(122)
-    plt.imshow(x_fake)
+def plt_curvese(imgs):
+    plt.figure()
+    if type(imgs) is not list:
+        plt.imshow(imgs)
+    else:
+        imglen = len(imgs)
+        cols = 2
+        rows = (int)((imglen + 1) / 2)
+        for i in range(0, len(imgs)):
+            plt.subplot(rows, cols, i+1)
+            plt.imshow(imgs[i])
     plt.show()
 
+
+def test_single_image(r_net: torch.nn.Module,
+                      d_net: torch.nn.Module,
+                      img_path, need_show=False):
+
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
+    print("Use Device : %s" % (device))
+
+    x_real, ts_img = read_img(img_path, (64, 64), False)
+
+    with torch.no_grad():
+        ts_img = torch.tensor(ts_img).unsqueeze(0).to(device)
+        pass
+        x_fake = r_net(ts_img)
+
+        score = d_net(x_fake)
+        
+        print(score)
+
+        x_fake_img = x_fake[0].cpu().detach().numpy().transpose((1, 2, 0))
+
+        plt_curvese([x_real, x_fake_img])
+
+
 def main(args):
-    
-    test_raw_dataset = valid_raw_dataset = torchvision.datasets.MNIST(root='./mnist',
-                                                   train=False,
-                                                   download=True,
-                                                   transform=tf.Compose([tf.ToTensor(), tf.Normalize((0.1307,), (0.3081,))]))
-    
-    
-    test_dataset = Dataset(test_raw_dataset, [9])
-    
-    
+
     if args.gpu and torch.cuda.is_available():
         device = torch.device('cuda:0')
         print(f'Using GPU {torch.cuda.get_device_name()}')
@@ -76,26 +101,32 @@ def main(args):
     else:
         device = torch.device('cpu')
         print('Using CPU')
-    
-    
-    assert(args.load_path)
-    
+
+    assert (args.load_path)
+
     r_net_path = os.path.join(args.load_path, args.r_load_path)
     d_net_path = os.path.join(args.load_path, args.d_load_path)
-    
+
     r_net = torch.load(r_net_path).to(device)
-    
+
     print(f'Loaded R_Net from {r_net_path}')
-    
+
     d_net = torch.load(d_net_path).to(device)
-    
+
     print(f'Loaded D_Net from {d_net_path}')
 
-    test_model(r_net,d_net,test_dataset)
+    if args.test:
+        test_single_image(r_net=r_net, d_net=d_net, img_path=args.img_path)
+
+    else:
+        train_dataset = TrajectoryDataset(
+            dataset_dir=args.data_path, labels={1, 2, 3, 4, 5, 6, 7})
+
+        # test_model(r_net,d_net,test_dataset)
 
 
 if __name__ == '__main__':
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', action='store_false',
                         help='Turns off gpu training')
@@ -129,8 +160,13 @@ if __name__ == '__main__':
                         help='Turns on skip connections with concatenation')
     parser.add_argument('--res', action='store_true',
                         help='Turns on residual connections')
+
+    parser.add_argument('--test', action='store_false',
+                        help='just test for the single image')
+
+    parser.add_argument('--img_path', type=str, default='/home/juxiaobing/code/GraduationProject/CNN-VAE/data/T15/T15_images/1/1.jpg',
+                        help='测试单张图片时使用')
+
     args = parser.parse_args()
 
     main(args)
-
-    

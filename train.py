@@ -1,3 +1,5 @@
+
+from TrajectoriesDataSet import TrajectoryDataset
 import os
 import torch
 import matplotlib.pyplot as plt

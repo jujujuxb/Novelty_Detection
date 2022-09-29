@@ -52,6 +52,10 @@ class TrajectoryDataset(torch.utils.data.Dataset):
 
         cvimg = cv2.normalize(cvimg, 0, 1, norm_type=cv2.NORM_MINMAX)
 
+        cv2.imshow("frame", cvimg)
+
+        cv2.waitKey(0)
+
         cvimg = np.array(cvimg, dtype=np.float32).transpose([2, 0, 1])
 
         return cvimg
