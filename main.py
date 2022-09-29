@@ -90,7 +90,7 @@ if __name__ == "__main__":
                         help='Name of .pth file for d_net to be loaded')
     parser.add_argument('--r_load_path', '-rlp', type=str, default='r_net.pth',
                         help='Name of .pth file for r_net to be loaded')
-    parser.add_argument('--batch_size', type=int, default=4,
+    parser.add_argument('--batch_size', type=int, default=16,
                         help='Batch size for data loader')
     parser.add_argument('--rec_bound', type=float, default=0.1,
                         help='Upper bound of reconstruction loss')
