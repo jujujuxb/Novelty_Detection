@@ -32,7 +32,6 @@ class TrajectoryDataset(torch.utils.data.Dataset):
                 for img_path in img_paths:
                     labels.append([img_path, label])
                 self.length += len(img_path)
-
         return labels
 
     def read_imgs(self):
@@ -49,6 +48,8 @@ class TrajectoryDataset(torch.utils.data.Dataset):
         if need_trasform:
             cvimg = cv2.cvtColor(cvimg, cv2.COLOR_BGR2RGB)
 
+        cvimg = cv2.resize(cvimg, dsize=(64, 64))
+
         cvimg = np.array(cvimg, dtype=np.float32).transpose([2, 0, 1])
 
         return cvimg
@@ -64,7 +65,5 @@ class TrajectoryDataset(torch.utils.data.Dataset):
 
 if __name__ == '__main__':
     data = TrajectoryDataset(labels={1, 2, 3, 4})
-
-    data.__getitem__(0)
 
     pass

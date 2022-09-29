@@ -58,7 +58,7 @@ def main(args):
     else:
         r_net = R_Net(in_channels=3, std=args.std,
                       skip=args.res, cat=args.cat).to(device)
-        d_net = D_Net(in_resolution=(288, 360), in_channels=3).to(device)
+        d_net = D_Net(in_resolution=(64, 64), in_channels=3).to(device)
         print('Created models')
 
     # TRAINING PARAMETERS
@@ -90,7 +90,7 @@ if __name__ == "__main__":
                         help='Name of .pth file for d_net to be loaded')
     parser.add_argument('--r_load_path', '-rlp', type=str, default='r_net.pth',
                         help='Name of .pth file for r_net to be loaded')
-    parser.add_argument('--batch_size', type=int, default=1,
+    parser.add_argument('--batch_size', type=int, default=4,
                         help='Batch size for data loader')
     parser.add_argument('--rec_bound', type=float, default=0.1,
                         help='Upper bound of reconstruction loss')

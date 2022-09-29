@@ -96,7 +96,7 @@ def train_model(r_net: torch.nn.Module,
             plot_learning_curves(metrics, metric_path)
 
         # if valid_metrics['rec_loss'] < rec_loss_bound and train_metrics['rec_loss'] < rec_loss_bound:
-        if valid_metrics['rec_loss'] < rec_loss_bound:
+        if train_metrics['rec_loss'] < rec_loss_bound:
             torch.save(r_net, r_net_path)
             torch.save(d_net, d_net_path)
             print('Reconstruction loss achieved optimum')
