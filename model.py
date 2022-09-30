@@ -88,17 +88,17 @@ class R_Net(torch.nn.Module):
                                    torch.nn.BatchNorm2d(n_channels*4),
                                    self.activation(),
                                    torch.nn.ConvTranspose2d(
-                                       self.n_c*4, n_channels*2, self.k_size, bias=False),
-                                   torch.nn.BatchNorm2d(n_channels*2),
-                                   self.activation(),
-                                   torch.nn.ConvTranspose2d(
-                                       self.n_c*2, n_channels, self.k_size, bias=False),
-                                   torch.nn.BatchNorm2d(n_channels),
-                                   self.activation(),
-                                   torch.nn.ConvTranspose2d(
-                                       self.n_c, self.in_channels, self.k_size, bias=False),
-                                   torch.nn.BatchNorm2d(self.in_channels),
-                                   self.activation()])
+            self.n_c*4, n_channels*2, self.k_size, bias=False),
+            torch.nn.BatchNorm2d(n_channels*2),
+            self.activation(),
+            torch.nn.ConvTranspose2d(
+            self.n_c*2, n_channels, self.k_size, bias=False),
+            torch.nn.BatchNorm2d(n_channels),
+            self.activation(),
+            torch.nn.ConvTranspose2d(
+            self.n_c, self.in_channels, self.k_size, bias=False),
+            torch.nn.BatchNorm2d(self.in_channels),
+            self.activation()])
 
     def forward(self, x: torch.Tensor, noise: bool = True):
 

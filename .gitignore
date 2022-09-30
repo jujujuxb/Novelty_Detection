@@ -3,3 +3,4 @@ mnist/
 models/
 *.tar
 data/
+samples/

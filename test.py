@@ -15,6 +15,7 @@ import cv2
 import numpy as np
 from utils import read_img
 import math
+import glob
 
 
 def test_model(r_net: torch.nn.Module,
@@ -54,7 +55,7 @@ def test_model(r_net: torch.nn.Module,
             pass
 
 
-def plt_curvese(imgs):
+def plt_curvese(imgs, path=None, need_show=False):
     plt.figure()
     if type(imgs) is not list:
         plt.imshow(imgs)
@@ -65,7 +66,13 @@ def plt_curvese(imgs):
         for i in range(0, len(imgs)):
             plt.subplot(rows, cols, i+1)
             plt.imshow(imgs[i])
-    plt.show()
+            plt.xticks([])
+            plt.yticks([])
+    if path is not None:
+        print(path)
+        plt.savefig(path)
+    if need_show:
+        plt.show()
 
 
 def test_single_image(r_net: torch.nn.Module,
@@ -78,18 +85,22 @@ def test_single_image(r_net: torch.nn.Module,
 
     x_real, ts_img = read_img(img_path, (64, 64), False)
 
+    img_name = img_path.split("/")[-1]
+
     with torch.no_grad():
         ts_img = torch.tensor(ts_img).unsqueeze(0).to(device)
         pass
         x_fake = r_net(ts_img)
 
         score = d_net(x_fake)
-        
+
         print(score)
 
         x_fake_img = x_fake[0].cpu().detach().numpy().transpose((1, 2, 0))
 
-        plt_curvese([x_real, x_fake_img])
+        res_path = os.path.join(os.getcwd(), "samples", img_name)
+
+        plt_curvese([x_real, x_fake_img], res_path)
 
 
 def main(args):
@@ -116,7 +127,11 @@ def main(args):
     print(f'Loaded D_Net from {d_net_path}')
 
     if args.test:
-        test_single_image(r_net=r_net, d_net=d_net, img_path=args.img_path)
+        if args.img_dir is not None:
+            img_paths = glob.glob(os.path.join(args.img_dir, "*.jpg"))
+            for img_path in img_paths:
+                test_single_image(r_net=r_net, d_net=d_net,
+                                  img_path=img_path)
 
     else:
         train_dataset = TrajectoryDataset(
@@ -164,7 +179,10 @@ if __name__ == '__main__':
     parser.add_argument('--test', action='store_false',
                         help='just test for the single image')
 
-    parser.add_argument('--img_path', type=str, default='/home/juxiaobing/code/GraduationProject/CNN-VAE/data/T15/T15_images/1/1.jpg',
+    parser.add_argument('--img_dir', type=str,
+                        default='/home/juxiaobing/code/GraduationProject/CNN-VAE/data/T15/T15_images/12')
+
+    parser.add_argument('--img_path', type=str, default='/home/juxiaobing/code/GraduationProject/CNN-VAE/data/T15/T15_images/1/11.jpg',
                         help='测试单张图片时使用')
 
     args = parser.parse_args()
