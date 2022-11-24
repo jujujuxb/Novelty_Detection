@@ -6,7 +6,8 @@ from collections import OrderedDict
 from sortedcontainers import SortedDict, SortedSet
 import cv2
 import numpy as np
-import tqdm
+from rich.progress import track
+from rich import print
 
 
 class TrajectoryDataset(torch.utils.data.Dataset):
@@ -21,7 +22,6 @@ class TrajectoryDataset(torch.utils.data.Dataset):
         self.read_imgs()
 
     def get_labels(self):
-        self.length = 0
         class_dirs = os.path.join(self.dataset_dir, '*')
         paths = glob.glob(class_dirs)
         labels = []
@@ -31,14 +31,11 @@ class TrajectoryDataset(torch.utils.data.Dataset):
                 img_paths = glob.glob(os.path.join(path, '*.jpg'))
                 for img_path in img_paths:
                     labels.append([img_path, label])
-                self.length += len(img_path)
+                self.length += len(img_paths)
         return labels
 
     def read_imgs(self):
-
-        print("Load images .... ")
-
-        for idx in tqdm.tqdm(range(self.length)):
+        for idx in track(range(self.length), description="Load Images({labels}) :".format(labels=str(self.extract_labels))):
             self.img_dicts[idx] = self.read_img(self.img_labels_[idx][0])
 
     def read_img(self, img_path, need_trasform=True):
@@ -48,15 +45,9 @@ class TrajectoryDataset(torch.utils.data.Dataset):
         if need_trasform:
             cvimg = cv2.cvtColor(cvimg, cv2.COLOR_BGR2RGB)
 
-        cvimg = cv2.resize(cvimg, dsize=(64, 64))
+        cvimg = cv2.resize(cvimg,(120,120))
 
-        cvimg = cv2.normalize(cvimg, 0, 1, norm_type=cv2.NORM_MINMAX)
-
-        cv2.imshow("frame", cvimg)
-
-        cv2.waitKey(0)
-
-        cvimg = np.array(cvimg, dtype=np.float32).transpose([2, 0, 1])
+        cvimg = np.transpose(np.array(cvimg, np.float32), [2, 0, 1])
 
         return cvimg
 

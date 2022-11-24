@@ -1,4 +1,3 @@
-
 from TrajectoriesDataSet import TrajectoryDataset
 import os
 import torch
@@ -123,14 +122,14 @@ def train_single_epoch(r_net, d_net, optim_r, optim_d, r_loss, d_loss, train_loa
         x_real = data[0].to(device)
         x_fake = r_net(x_real)
 
-        d_net.zero_grad()
+        optim_d.zero_grad()
 
         dis_loss = d_loss(d_net, x_real, x_fake)
 
         dis_loss.backward()
         optim_d.step()
 
-        r_net.zero_grad()
+        optim_r.zero_grad()
 
         # L_r = gen_loss + lambda * rec_loss
         r_metrics = r_loss(d_net, x_real, x_fake, lambd)

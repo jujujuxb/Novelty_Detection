@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -42,6 +43,24 @@ class ModuleList(torch.nn.ModuleList):
             else:
                 x = module(x)
         return x, connections
+
+
+def build_encoder(in_channels, n_c, k_size=5, activation=torch.nn.LeakyReLU):
+    return nn.Sequential(torch.nn.Conv2d(in_channels, n_c, k_size, bias=False),
+                         torch.nn.BatchNorm2d(n_c),
+                         activation(),
+                         torch.nn.Conv2d(
+        n_c, n_c*2, k_size, bias=False),
+        torch.nn.BatchNorm2d(n_c*2),
+        activation(),
+        torch.nn.Conv2d(
+        n_c*2, n_c*4, k_size, bias=False),
+        torch.nn.BatchNorm2d(n_c*4),
+        activation(),
+        torch.nn.Conv2d(
+        n_c*4, n_c*8, k_size, bias=False),
+        torch.nn.BatchNorm2d(n_c*8),
+        activation())
 
 
 class R_Net(torch.nn.Module):
@@ -112,6 +131,7 @@ class R_Net(torch.nn.Module):
         else:
             x_out, _ = self.Decoder.forward(z)
 
+        # return x_out,z
         return x_out
 
     def add_noise(self, x):
@@ -190,13 +210,15 @@ def R_Loss(d_net: torch.nn.Module, x_real: torch.Tensor, x_fake: torch.Tensor, l
 
     L_r = gen_loss + lambd * rec_loss
 
+    # L_r = lambd * gen_loss + rec_loss
+
     return {'rec_loss': rec_loss, 'gen_loss': gen_loss, 'L_r': L_r}
 
 
 def D_Loss(d_net: torch.nn.Module, x_real: torch.Tensor, x_fake: torch.Tensor) -> torch.Tensor:
 
     pred_real = d_net(x_real)
-    pred_fake = d_net(x_fake.detach())
+    pred_fake = d_net(x_fake)
 
     y_real = torch.ones_like(pred_real)
     y_fake = torch.zeros_like(pred_fake)
